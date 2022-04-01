@@ -8,6 +8,11 @@ import { getAvailableDate } from "../../api/stock";
 import { useLocation } from "react-router-dom";
 
 const inputPriceFormat = (str) => {
+  if (str.length > 11) {
+    alert("투자 원금은 10억 미만으로 설정 가능합니다.");
+    return "max";
+  }
+
   if (str === "0") {
     return "";
   }
@@ -168,7 +173,10 @@ export default function BasicCondition({
         </div>
 
         <div className="col-start-1 col-span-6 xl:col-start-1 xl:col-span-4 text-left px-5">
-          <label htmlFor="asset">투자 원금 (원)</label>
+          <label htmlFor="asset" className="flex items-end">
+            투자 원금 (원){" "}
+            {/* <p className="text-sm ml-16 text-gray-500">최대 10억</p> */}
+          </label>
           <div className="flex items-center">
             <input
               id="asset"
@@ -178,8 +186,12 @@ export default function BasicCondition({
               required
               autoComplete="off"
               className="h-8 shadow-sm focus:ring-active focus:border-active mt-1 sm:text-sm border border-gray-300 rounded-md"
+              placeholder="최대 10억"
               onChange={(e) => {
                 const formattedValue = inputPriceFormat(e.target.value);
+                if (formattedValue === "max") {
+                  return;
+                }
                 setFormattedAsset(formattedValue);
                 handleStateChange("asset", formattedValue);
               }}
