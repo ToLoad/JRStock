@@ -4,7 +4,7 @@ import { ReactComponent as Group } from "../../assets/group.svg";
 export default function Footer() {
   return (
     <div className="h-60 w-full bg-gray-200 border-t-4 grid md:grid-cols-2 p-5">
-      <div className="col-span-1 flex flex-col">
+      {/* <div className="col-span-1 flex flex-col">
         <h1 className="text-2xl text-primary">4차동학개미운동</h1>
         <p className="text-gray-500 ">SSAFY 6기 특화 프로젝트</p>
         <p className="text-primary text-sm flex items-center gap-2">
@@ -17,7 +17,7 @@ export default function Footer() {
         <Link to="terms">이용약관</Link>
         <span> | </span>
         <Link to="privacy">개인정보처리방침 </Link>
-      </div>
+      </div> */}
     </div>
   );
 }
