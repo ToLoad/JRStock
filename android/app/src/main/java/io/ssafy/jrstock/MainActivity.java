@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -19,11 +20,14 @@ import com.google.firebase.messaging.FirebaseMessaging;
 public class MainActivity extends AppCompatActivity {
     WebView mWebView;
     TextView errorView;
+    BackPressCloseHandler backPressCloseHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        backPressCloseHandler = new BackPressCloseHandler(this); // 뒤로가기 설정
 
         errorView = (TextView) findViewById(R.id.error_text);
         mWebView = (WebView) findViewById(R.id.jrstock_web);
@@ -82,6 +86,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        mWebView.loadUrl("https://j6s001.p.ssafy.io/");
+        mWebView.loadUrl("https://j6s001.p.ssafy.io");
+
+
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mWebView.getOriginalUrl().equalsIgnoreCase("https://j6s001.p.ssafy.io")) {
+            backPressCloseHandler.onBackPressed();
+        }else if(mWebView.canGoBack()){
+            mWebView.goBack();
+        }else{
+            backPressCloseHandler.onBackPressed();
+        }
     }
 }
