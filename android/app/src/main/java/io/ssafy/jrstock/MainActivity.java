@@ -2,29 +2,18 @@ package io.ssafy.jrstock;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 
-import android.app.Activity;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
-import android.webkit.ConsoleMessage;
-import android.webkit.JavascriptInterface;
-import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -36,8 +25,8 @@ public class MainActivity extends AppCompatActivity {
     BackPressCloseHandler backPressCloseHandler;
     NotificationManager notificationManager;
 
-//    static final String BASE_URL = "https://j6s001.p.ssafy.io";
-    static final String BASE_URL = "http://10.0.2.2:3000";
+    static final String BASE_URL = "https://j6s001.p.ssafy.io";
+//    static final String BASE_URL = "http://10.0.2.2:3000";
     static String token;
     String CHANNEL_ID = "FcmChannelId";
 
@@ -58,8 +47,6 @@ public class MainActivity extends AppCompatActivity {
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "FCM", NotificationManager.IMPORTANCE_HIGH);
             notificationManager.createNotificationChannel(channel);
         }
-
-
 
         // 웹 뷰 관련 설정
         WebSettings webSettings = mWebView.getSettings();
@@ -100,30 +87,21 @@ public class MainActivity extends AppCompatActivity {
 
         // 시작시 FCM 토큰을 받아오는 부분
         FirebaseMessaging.getInstance().getToken()
-                .addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (!task.isSuccessful()) {
-                            Log.w("TAG", "Fetching FCM registration token failed", task.getException());
-                            return;
-                        }
-
-                        // Get new FCM registration token
-                        token = task.getResult();
-
-                        // Log and toast
-                        Log.d("TAG", token);
-                        Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        Log.w("TAG", "Fetching FCM registration token failed", task.getException());
+                        return;
                     }
+                    token = task.getResult();
                 });
 
         // 웹뷰 페이지의 Console.log 받아오는 부분
-        mWebView.setWebChromeClient(new WebChromeClient() {
-            public boolean onConsoleMessage(ConsoleMessage message) {
-                Log.d("WebViewConsoleLog", "web_message:" + message.message() );
-                return true;
-            }
-        });
+//        mWebView.setWebChromeClient(new WebChromeClient() {
+//            public boolean onConsoleMessage(ConsoleMessage message) {
+//                Log.d("WebViewConsoleLog", "web_message:" + message.message() );
+//                return true;
+//            }
+//        });
 
         // 웹뷰에서 보내는 JS 함수를 실행하기 위한 부분
         WebBridge webBridge = new WebBridge();
@@ -131,13 +109,10 @@ public class MainActivity extends AppCompatActivity {
         mWebView.addJavascriptInterface(webBridge, "BRIDGE");
 
         // 알림으로 접근시 지정된 페이지로 이동동
-       String test = getIntent().getStringExtra("URL");
-        if (test != null) {
-            mWebView.loadUrl(test);
-            Log.d("======================", test);
+       String url = getIntent().getStringExtra("URL");
+        if (url != null) {
+            mWebView.loadUrl(url);
         }
-
-
     }
 
     @Override
@@ -149,5 +124,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
+    @Override
+    protected void onNewIntent(Intent intent) {
+        String url = intent.getStringExtra("URL");
+        if (url != null) {
+            mWebView.loadUrl(url);
+        }
+        super.onNewIntent(intent);
+    }
 }
