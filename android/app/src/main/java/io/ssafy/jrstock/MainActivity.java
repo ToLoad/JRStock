@@ -3,10 +3,16 @@ package io.ssafy.jrstock;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.app.NotificationManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.webkit.ConsoleMessage;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -21,6 +27,11 @@ public class MainActivity extends AppCompatActivity {
     WebView mWebView;
     TextView errorView;
     BackPressCloseHandler backPressCloseHandler;
+    NotificationManager notificationManager;
+
+//    static final String BASE_URL = "https://j6s001.p.ssafy.io";
+    static final String BASE_URL = "http://10.0.2.2:3000";
+    static String token;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     // Get new FCM registration token
-                    String token = task.getResult();
+                    token = task.getResult();
 
                     // Log and toast
                     Log.d("TAG", token);
@@ -85,15 +96,22 @@ public class MainActivity extends AppCompatActivity {
                 errorView.setVisibility(View.VISIBLE);
             }
         });
+        mWebView.setWebChromeClient(new WebChromeClient() {
+            public boolean onConsoleMessage(ConsoleMessage message) {
+                Log.d("WebViewConsoleLog", "web_message:" + message.message() );
+                return true;
+            }
+        });
 
-        mWebView.loadUrl("https://j6s001.p.ssafy.io");
-
+        WebBridge webBridge = new WebBridge();
+        mWebView.loadUrl(BASE_URL);
+        mWebView.addJavascriptInterface(webBridge, "BRIDGE");
 
     }
 
     @Override
     public void onBackPressed() {
-        if (mWebView.getOriginalUrl().equalsIgnoreCase("https://j6s001.p.ssafy.io")) {
+        if (mWebView.getOriginalUrl().equalsIgnoreCase(BASE_URL)) {
             backPressCloseHandler.onBackPressed();
         }else if(mWebView.canGoBack()){
             mWebView.goBack();
