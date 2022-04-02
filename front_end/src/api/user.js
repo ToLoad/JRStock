@@ -11,6 +11,7 @@ async function oauth(response) {
   const api = apiInstance();
   return await api.post("/user/login/google/", {
     accessToken: response.accessToken,
+    token: response.token,
   });
 }
 
