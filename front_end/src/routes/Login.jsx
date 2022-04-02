@@ -219,8 +219,6 @@ export default function Login() {
                   className="w-full mt-5 rounded-md"
                   clientId={clientId}
                   responseType={"id_token"}
-                  uxMode="redirect"
-                  isSignedIn={true}
                   onSuccess={onSuccess}
                   onFailure={onFailure}
                 />

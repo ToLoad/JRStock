@@ -2,17 +2,23 @@ package io.ssafy.jrstock;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.webkit.ConsoleMessage;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -20,7 +26,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.messaging.FirebaseMessaging;
 
 public class MainActivity extends AppCompatActivity {
+    FrameLayout mContainer;
     WebView mWebView;
+    WebView mWebViewPop;
     TextView errorView;
     BackPressCloseHandler backPressCloseHandler;
     NotificationManager notificationManager;
@@ -37,8 +45,10 @@ public class MainActivity extends AppCompatActivity {
 
         backPressCloseHandler = new BackPressCloseHandler(this); // 뒤로가기 설정
 
+        mContainer = (FrameLayout) findViewById(R.id.webview_frame);
         errorView = (TextView) findViewById(R.id.error_text);
         mWebView = (WebView) findViewById(R.id.jrstock_web);
+        mWebViewPop = (WebView) findViewById(R.id.jrstock_web);
 
         notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
@@ -51,6 +61,35 @@ public class MainActivity extends AppCompatActivity {
         // 웹 뷰 관련 설정
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        mWebView.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+        mWebView.getSettings().setSupportMultipleWindows(true);
+
+        mWebView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+                mWebViewPop = new WebView(view.getContext());
+                mWebViewPop.getSettings().setJavaScriptEnabled(true);
+                mWebViewPop.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+                mWebViewPop.getSettings().setSupportMultipleWindows(true);
+                mWebViewPop.getSettings().setDomStorageEnabled(true);
+                mWebViewPop.getSettings().setUserAgentString("Mozilla/5.0 AppleWebKit/535.19 Chrome/56.0.0 Mobile Safari/535.19");
+                mWebViewPop.setWebChromeClient(new WebChromeClient() {
+                    @Override
+                    public void onCloseWindow(WebView window) {
+                        mContainer.removeView(window);
+                        window.destroy();
+                    }
+                });
+
+                mWebViewPop.setWebViewClient(new WebViewClient());
+                mWebViewPop.setLayoutParams(new ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.MATCH_PARENT, ConstraintLayout.LayoutParams.MATCH_PARENT));
+                mContainer.addView(mWebViewPop);
+                WebView.WebViewTransport transport = (WebView.WebViewTransport) resultMsg.obj;
+                transport.setWebView(mWebViewPop);
+                resultMsg.sendToTarget();
+                return true;
+            }
+        });
 
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
@@ -102,10 +141,11 @@ public class MainActivity extends AppCompatActivity {
 //                return true;
 //            }
 //        });
+        mWebView.getSettings().setUserAgentString("Mozilla/5.0 AppleWebKit/535.19 Chrome/56.0.0 Mobile Safari/535.19");
+        mWebView.loadUrl(BASE_URL);
 
         // 웹뷰에서 보내는 JS 함수를 실행하기 위한 부분
         WebBridge webBridge = new WebBridge();
-        mWebView.loadUrl(BASE_URL);
         mWebView.addJavascriptInterface(webBridge, "BRIDGE");
 
         // 알림으로 접근시 지정된 페이지로 이동동
