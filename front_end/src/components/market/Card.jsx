@@ -65,16 +65,25 @@ export default function card({ info }) {
           )}
         >
           <div className="text-black mb-2">오늘의 종가 예측</div>
-
-          <span className="mr-3">
-            {(+info.predict.result_close.toFixed(2)).toLocaleString()}
-          </span>
-          <span>{`${info.predict.result_close - info.close < 0 ? "▼" : "▲"} ${(
-            info.predict.result_close - info.close
-          ).toFixed(3)} (${(
-            (info.predict.result_close / info.close) * 100 -
-            100
-          ).toFixed(3)}%)`}</span>
+          {info.predict.result_close ? (
+            <span className="mr-3">
+              {(+info.predict.result_close.toFixed(2)).toLocaleString()}
+            </span>
+          ) : (
+            <span className="block text-active mr-3 mb-2">
+              공휴일은 제공되지 않습니다.
+            </span>
+          )}
+          {info.predict.result_close ? (
+            <span>{`${
+              info.predict.result_close - info.close < 0 ? "▼" : "▲"
+            } ${(info.predict.result_close - info.close).toFixed(3)} (${(
+              (info.predict.result_close / info.close) * 100 -
+              100
+            ).toFixed(3)}%)`}</span>
+          ) : (
+            <></>
+          )}
         </div>
         <div className="ml-5 text-primary text-base whitespace-pre-wrap">
           <strong>JR Stock</strong>에서 제공하는 머신러닝 기반 주가 예측
