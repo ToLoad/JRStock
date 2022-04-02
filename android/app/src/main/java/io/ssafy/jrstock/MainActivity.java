@@ -2,9 +2,16 @@ package io.ssafy.jrstock;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -32,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
 //    static final String BASE_URL = "https://j6s001.p.ssafy.io";
     static final String BASE_URL = "http://10.0.2.2:3000";
     static String token;
+    String CHANNEL_ID = "FcmChannelId";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,26 +51,19 @@ public class MainActivity extends AppCompatActivity {
         errorView = (TextView) findViewById(R.id.error_text);
         mWebView = (WebView) findViewById(R.id.jrstock_web);
 
+        notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        // 버전이 오레오보다 높으면 채널 생성
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "FCM", NotificationManager.IMPORTANCE_HIGH);
+            notificationManager.createNotificationChannel(channel);
+        }
+
+
+
+        // 웹 뷰 관련 설정
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-
-        FirebaseMessaging.getInstance().getToken()
-            .addOnCompleteListener(new OnCompleteListener<String>() {
-                @Override
-                public void onComplete(@NonNull Task<String> task) {
-                    if (!task.isSuccessful()) {
-                        Log.w("TAG", "Fetching FCM registration token failed", task.getException());
-                        return;
-                    }
-
-                    // Get new FCM registration token
-                    token = task.getResult();
-
-                    // Log and toast
-                    Log.d("TAG", token);
-                    Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
-                }
-            });
 
         mWebView.setWebViewClient(new WebViewClient() {
             @Override
@@ -96,6 +97,27 @@ public class MainActivity extends AppCompatActivity {
                 errorView.setVisibility(View.VISIBLE);
             }
         });
+
+        // 시작시 FCM 토큰을 받아오는 부분
+        FirebaseMessaging.getInstance().getToken()
+                .addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.w("TAG", "Fetching FCM registration token failed", task.getException());
+                            return;
+                        }
+
+                        // Get new FCM registration token
+                        token = task.getResult();
+
+                        // Log and toast
+                        Log.d("TAG", token);
+                        Toast.makeText(MainActivity.this, token, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+        // 웹뷰 페이지의 Console.log 받아오는 부분
         mWebView.setWebChromeClient(new WebChromeClient() {
             public boolean onConsoleMessage(ConsoleMessage message) {
                 Log.d("WebViewConsoleLog", "web_message:" + message.message() );
@@ -103,20 +125,29 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // 웹뷰에서 보내는 JS 함수를 실행하기 위한 부분
         WebBridge webBridge = new WebBridge();
         mWebView.loadUrl(BASE_URL);
         mWebView.addJavascriptInterface(webBridge, "BRIDGE");
+
+        // 알림으로 접근시 지정된 페이지로 이동동
+       String test = getIntent().getStringExtra("URL");
+        if (test != null) {
+            mWebView.loadUrl(test);
+            Log.d("======================", test);
+        }
+
 
     }
 
     @Override
     public void onBackPressed() {
-        if (mWebView.getOriginalUrl().equalsIgnoreCase(BASE_URL)) {
-            backPressCloseHandler.onBackPressed();
-        }else if(mWebView.canGoBack()){
+        if(mWebView.canGoBack()){
             mWebView.goBack();
         }else{
             backPressCloseHandler.onBackPressed();
         }
     }
+
+
 }

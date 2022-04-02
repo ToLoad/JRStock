@@ -1,5 +1,6 @@
 package io.ssafy.jrstock;
 
+import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -8,10 +9,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.RingtoneManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
 
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -25,6 +28,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
+    String CHANNEL_ID = "FcmChannelId";
+
     @Override
     public void onNewToken(String token) {
         Log.d("MyFirebaseMsgService", "Refreshed token: " + token);
@@ -45,55 +50,34 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private void sendPushNotification(String message) {
         System.out.println("received message : " + message);
-//
-//        try {
-//            JSONObject jsonRootObject = new JSONObject(message);
-//            title = jsonRootObject.getString("title");
-//            contents = jsonRootObject.getString("contents");
-//            imgurl = jsonRootObject.getString("imgurl");
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
-//
-//        Bitmap bitmap = getBitmapFromURL(imgurl);
-//
-//        Intent intent = new Intent(this, MainActivity.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-//        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0 /* Request code */, intent,
-//                PendingIntent.FLAG_ONE_SHOT);
-//
-//        Uri defaultSoundUri= RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-//        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this)
-//                .setSmallIcon(R.drawable.bar_icon)
-//                .setLargeIcon(bitmap)
-//                .setContentTitle(title)
-//                .setContentText(contents)
-//                .setAutoCancel(true)
-//                .setSound(defaultSoundUri).setLights(000000255,500,2000)
-//                .setContentIntent(pendingIntent);
-//
-//        NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        // 버전이 오레오보다 높고 낮을 때를 분리해서 builder 생성
+        NotificationCompat.Builder builder;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder = new NotificationCompat.Builder(this, CHANNEL_ID);
+        } else {
+            builder = new NotificationCompat.Builder(this);
+        }
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.putExtra("URL", "https://www.naver.com");
+        intent.setAction(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        builder.setSmallIcon(R.drawable.ic_notification)
+                .setContentTitle("알림 테스트")
+                .setContentText("알림 내용")
+                .setContentIntent(pendingIntent)
+                .setDefaults(Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE)
+                .setPriority(NotificationCompat.PRIORITY_MAX);
+
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+
 //        PowerManager pm = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
 //        PowerManager.WakeLock wakeLock = pm.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP,
 //                "MyApp::MyWakelockTag");
 //        wakeLock.acquire(5000);
-//        wakeLock.release();
 //
-//        notificationManager.notify(0 /* ID of notification */, notificationBuilder.build());
-    }
-
-    public Bitmap getBitmapFromURL(String strURL) {
-        try {
-            URL url = new URL(strURL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setDoInput(true);
-            connection.connect();
-            InputStream input = connection.getInputStream();
-            Bitmap myBitmap = BitmapFactory.decodeStream(input);
-            return myBitmap;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+//        wakeLock.release();
+        notificationManagerCompat.notify(1, builder.build()); // ID가 다르면 개별 알림
     }
 }

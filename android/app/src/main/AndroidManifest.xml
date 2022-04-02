@@ -27,10 +27,10 @@
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_launcher_foreground" />
+            android:resource="@drawable/ic_notification" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@android:color/holo_blue_dark" />
+            android:resource="@android:color/background_dark" />
         <service
             android:name=".MyFirebaseMessagingService"
             android:exported="false">
