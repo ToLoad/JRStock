@@ -13,6 +13,7 @@ from notice.serializers import NoticeSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .parser import get_serializer
+from .fcm import send_to_fcm
 
 @swagger_auto_schema(
     method='post',
@@ -37,7 +38,9 @@ def notice_create(request):
     if serializer.is_valid(raise_exception=True):
         # JWT 인증 사용시 인증객체를 통해 인증을 진행하고 사용자 정보를 request.user 객체에 저장
         # 인증정보가 없거나 일치하지않으면 AnonymousUser를 저장
-        serializer.save(user=request.user)
+        notice = serializer.save(user=request.user)
+        send_to_fcm(notice.title, notice.content, notice.id)
+        
         return Response(status=status.HTTP_201_CREATED)
 
 page = openapi.Parameter('page', openapi.IN_QUERY, default=1,

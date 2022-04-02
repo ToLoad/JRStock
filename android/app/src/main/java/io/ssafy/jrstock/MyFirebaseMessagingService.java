@@ -20,18 +20,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
-        sendPushNotification(remoteMessage.getData().get("message"));
-    }
-
-    private void sendPushNotification(String message) {
-        try {
-            JSONObject  jsonRootObject = new JSONObject(message);
-            title = jsonRootObject.getString("title");
-            contents = jsonRootObject.getString("contents");
-            url = jsonRootObject.getString("url");
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+        title = remoteMessage.getData().get("title");
+        contents = remoteMessage.getData().get("contents");
+        url = remoteMessage.getData().get("url");
 
         // 버전이 오레오보다 높고 낮을 때를 분리해서 builder 생성
         NotificationCompat.Builder builder;

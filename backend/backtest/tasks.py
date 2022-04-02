@@ -15,6 +15,7 @@ from celery import shared_task
 
 from .common import *
 from .strategy import *
+from .fcm import send_to_fcm
 
 strategy_name_dict={
     101: 'ma_up_pass', 102: 'ma_down_pass', 103: 'ma_golden_cross', 104: 'ma_dead_cross', 105: 'ma_straight', 106: 'ma_reverse',
@@ -153,5 +154,8 @@ def backtest(account, code_number, start_date, end_date, buy_condition, sell_con
         return message
 
     message = 'User Number [' + str(user.id) + '] Backtest Request Finished'
+    if user.token:
+        send_to_fcm(user.token, result_id)
+        
     return message
 

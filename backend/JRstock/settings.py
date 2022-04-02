@@ -1,5 +1,7 @@
 import os
 from datetime import timedelta
+import firebase_admin
+from firebase_admin import credentials
 
 # 숨겨둔 키를 불러오는 코드
 from pathlib import Path
@@ -15,6 +17,11 @@ secrets = json.loads(open(SECRET_BASE_FILE).read())
 for key, value in secrets.items():
     setattr(sys.modules[__name__], key, value)
 # 여기까지
+
+# FCM
+cred_path = os.path.join(BASE_DIR, 'serviceAccountKey.json')
+cred = credentials.Certificate(cred_path)
+firebase_admin.initialize_app(cred)
 
 DEBUG = True
 
