@@ -49,7 +49,13 @@ export default function Login() {
   // 로그인 요청 시 실행
   const tryLogin = async () => {
     try {
-      const result = await login({ email, password });
+      var token = "";
+
+      // 앱인 경우 아래 명령어로 token을 가져온다.
+      try {
+        token = window.BRIDGE.getFcmToken();
+      } catch (error) {}
+      const result = await login({ email, password, token });
       sessionStorage.setItem("access_token", result.data.access_token);
 
       if (isSave) {
@@ -81,8 +87,13 @@ export default function Login() {
 
   // 소셜 로그인 성공 시 실행
   const onSuccess = async (response) => {
+    var token = "";
+    // 앱인 경우 아래 명령어로 token을 가져온다.
     try {
-      const result = await oauth(response);
+      token = window.BRIDGE.getFcmToken();
+    } catch (error) {}
+    try {
+      const result = await oauth({ response, token });
       sessionStorage.setItem("access_token", result.data.access_token);
       navigate(from);
     } catch (e) {
