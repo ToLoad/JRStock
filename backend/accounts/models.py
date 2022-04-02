@@ -54,6 +54,7 @@ class User(AbstractBaseUser):
     is_admin = models.BooleanField(default=False)
     is_google = models.BooleanField(default=False)
     is_backtest = models.BooleanField(default=False)
+    token = models.CharField(max_length=300, null=True, blank=True)
 
     objects = UserManager()
 
