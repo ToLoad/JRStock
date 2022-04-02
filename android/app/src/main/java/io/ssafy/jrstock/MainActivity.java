@@ -133,6 +133,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     token = task.getResult();
                 });
+        FirebaseMessaging.getInstance().subscribeToTopic("jrstock");
 
         // 웹뷰 페이지의 Console.log 받아오는 부분
 //        mWebView.setWebChromeClient(new WebChromeClient() {
