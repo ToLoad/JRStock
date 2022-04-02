@@ -328,11 +328,18 @@ def email_confirm(request, **kwargs):
 def login(request):
     email = request.data.get('email')
     password = request.data.get('password')
+    
+        
 
     user = authenticate(email=email, password=password)
     if user is None:
         return Response({'message': '이메일 인증이 완료되지 않았거나, 아이디 또는 비밀번호가 일치하지 않습니다.'}, status=status.HTTP_401_UNAUTHORIZED)
 
+    token = request.data.get('token')
+    if token:
+        user.token = request.data.get('token')
+        user.save()
+        
     refresh = RefreshToken.for_user(user)
     update_last_login(None, user)
 
@@ -380,6 +387,10 @@ def google_login(request):
         user = User.objects.get(email=email)
         refresh = RefreshToken.for_user(user)
         update_last_login(None, user)
+        token = request.data.get('token')
+        if token:
+            user.token = request.data.get('token')
+            user.save()
 
         return Response({'access_token': str(refresh.access_token),
                         'refresh_token': str(refresh),}, status=status.HTTP_200_OK)
@@ -388,6 +399,10 @@ def google_login(request):
         user = User.objects.create_social_user(userinfo=userinfo)
         refresh = RefreshToken.for_user(user)
         update_last_login(None, user)
+        token = request.data.get('token')
+        if token:
+            user.token = request.data.get('token')
+            user.save()
 
         return Response({'access_token': str(refresh.access_token),
                         'refresh_token': str(refresh),}, status=status.HTTP_200_OK)
