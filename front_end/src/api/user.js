@@ -7,11 +7,11 @@ async function login(user) {
 }
 
 // 소셜 로그인 기능
-async function oauth(response) {
+async function oauth(response, token) {
   const api = apiInstance();
   return await api.post("/user/login/google/", {
     accessToken: response.accessToken,
-    token: response.token,
+    token: token,
   });
 }
 
