@@ -93,7 +93,7 @@ export default function Login() {
       token = window.BRIDGE.getFcmToken();
     } catch (error) {}
     try {
-      const result = await oauth({ response, token });
+      const result = await oauth(response, token);
       sessionStorage.setItem("access_token", result.data.access_token);
       navigate(from);
     } catch (e) {
