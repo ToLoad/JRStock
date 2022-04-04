@@ -27,7 +27,7 @@ class Result(models.Model):
     mdd = models.FloatField(blank=True, null=True)
     win_lose_rate = models.FloatField(blank=True, null=True)
     final_asset = models.BigIntegerField(blank=True, null=True)
-    final_earn = models.IntegerField(blank=True, null=True)
+    final_earn = models.BigIntegerField(blank=True, null=True)
     final_rate = models.FloatField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -64,7 +64,7 @@ class DayHistory(models.Model):
     result = models.ForeignKey(Result, on_delete=models.CASCADE)
     date = models.CharField(max_length=20)
     day_earn_rate = models.FloatField()
-    day_earn = models.IntegerField()
+    day_earn = models.BigIntegerField()
     current_asset = models.BigIntegerField()
     
     class Meta:
