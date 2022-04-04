@@ -245,7 +245,6 @@ def make_condition(result, isBuy, strategies, standard, ratio):
                 else: option.append(int(param))
         weight = conditions.get('weight')
         option.append(int(conditions.get('weight')))
-        print(option)
         condition.append(option)
         
         condition_info = {
@@ -388,6 +387,7 @@ def end_calculate(account, result_data, result):
         'final_rate' : result_data['my_final_rate']
     }
     
+    print(result_data['my_profit_loss'])
     serializer = ResultSerializer(instance=result, data=input_data)
     if serializer.is_valid(raise_exception=True):
         serializer.save()
