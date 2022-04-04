@@ -49,7 +49,7 @@ export default function Market() {
     // kospiSeriesData 초기화
     const kospiDayStock = await getDayStock("kospi");
     // 코스피 예측 종가
-    const kospiPredict = await getPredict("kospi");
+    const kospiPredict = await getPredict("kospi").catch(() => null);
 
     // 코스피 카드 정보 초기화
     setKospiInfo({
@@ -104,7 +104,7 @@ export default function Market() {
     // kosdaqSeriesData 초기화
     const kosdaqDayStock = await getDayStock("kosdaq");
     // 코스피 예측 종가
-    const kosdaqPredict = await getPredict("kosdaq");
+    const kosdaqPredict = await getPredict("kosdaq").catch(() => null);
 
     // 코스닥 카드 정보 초기화
     setKosdaqInfo({
