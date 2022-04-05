@@ -1,8 +1,22 @@
-# README
+## 목차
+
+### 1. [Introduction](#motivation)
+
+### 2. [Main Function](#main-function)
+
+### 3. [Technical Features](#technical-features)
+
+### 4. [Environment](#%EF%B8%8Fdevelopment-environment)
+
+### 5. [Project Planning](#service-architecture)
+
+### 6. [Our Team](#our-team)
+
+### 7. [Challenges ( Problems / Bugs )](#challenges-problems-bugs-)
 
 ![Untitled](README_assets/Untitled.png)
 
-## 💡**기획의도**
+## 💡**Motivation**
 
 최근 들어 주식에 대한 관심이 급증했으며 작년 동안 유입된 신규 투자자만 400만명에 다다릅니다.<br>그리고 이들은 주식에 대한 지식과 경험이 부족했고, 대부분 투자를 실패했습니다.
 
@@ -10,7 +24,7 @@
 
 그래서 저희는 주식에 입문하며, 주식에 대해 잘 모르는 소액 투자자들 일명 개미, 주린이들이 <br>안전하고 효과적으로 주식 투자를 공부할 수 있도록 매매 전략을 학습하고, 직접 구성한 전략을 테스트할 수 있는 서비스를 개발했습니다.
 
-## 💸**서비스 소개**
+## 💸**Introduction**
 
 **내 집 마련을 위해 주식은 선택이 아닌 필수!!<br>
 남들 다하니까 시작했다가, 손해만 보고 그만 두신 적 없으신가요?!<br>
@@ -19,9 +33,11 @@
 
 🔹**JRStock**은 국내 주식 기반 백테스트 플랫폼입니다.<br> **JRStock**은 주린이를 대상으로 서비스를 구성하여 누구나 쉽게 매매 전략을 구성하고, 테스트해볼 수 있으며, 결과를 분석할 수 있습니다. <br>또한 종목 토론방을 통해 지식을 공유하거나, 랭킹을 통해 다른 사람과 전략을 경쟁, 공유하며 성공적인 주식투자로 이끌 수 있습니다.
 
-## 💻 **프로젝트 기간 - [2021.02.21 ~ 2021.04.08]**
+## 💻 **Project Period - [2021.02.21 ~ 2021.04.08]**
 
-## 👀 **JRStock 서비스 시연 화면**
+sddsad
+
+## 👀 **jrstock service demo**
 
 ### 백테스트 생성
 
@@ -47,7 +63,7 @@
 
 ![태블릿알림.gif](README_assets/%ED%83%9C%EB%B8%94%EB%A6%BF%EC%95%8C%EB%A6%BC.gif)
 
-## 💡**주요 기능**
+## 💡**Main Function**
 
 ### 회원 관리
 
@@ -88,7 +104,31 @@
 - 일간, 주간, 월간 수익율 기준 전체 순위 정보 제공
 - 이름 검색을 통해 원하는 사용자 랭킹 정보를 제공
 
-## ⚙️**개발 환경**
+## 💪**Technical Features**
+
+### 주가 예측
+
+주가 예측 서비스는 이전 주가 데이터를 통해 다음 주가를 예측하여 제공하는 서비스입니다.<br>
+주가 예측 서비스에는 딥러닝 기술 RNN이 적용 됐습니다.<br>
+기존 신경망 알고리즘은 데이터 맥락을 학습시킬 수 없었기 때문에 순환 신경망 알고리즘을 사용하게 됐습니다.<br> 아래 예시에서 주가 추세를 상당히 정확하게 예측하고 있습니다.
+
+![Untitled](README_assets/Untitled%202.png)
+
+### 백테스팅 빅데이터
+
+약 2500개 주식에 대한 상장 이후 모든 일일 거래 데이터를 사용하고 있습니다. 또한 매일 스케쥴링을 통해 최신 데이터를 자동으로 수집하고 있습니다.
+
+![빅데이터사진.png](README_assets/%EB%B9%85%EB%8D%B0%EC%9D%B4%ED%84%B0%EC%82%AC%EC%A7%84.png)
+
+### 데이터 시각화
+
+백테스트 결과를 한 눈에 알아보기 편하도록 차트를 사용하여 데이터를 시각화 하였습니다.
+
+![종목라인차트.PNG](README_assets/%EC%A2%85%EB%AA%A9%EB%9D%BC%EC%9D%B8%EC%B0%A8%ED%8A%B8.png)
+
+![연도별수익률차트.PNG](README_assets/%EC%97%B0%EB%8F%84%EB%B3%84%EC%88%98%EC%9D%B5%EB%A5%A0%EC%B0%A8%ED%8A%B8.png)
+
+## ⚙️**Development Environment**
 
 ### Backend
 
@@ -142,35 +182,7 @@
 - Google Analytics
 - Google Cloud Platform(OAuth)
 
-## 💫서비스 아키텍처
-
-![Untitled](README_assets/Untitled%201.png)
-
-## 💪**기술 특이점**
-
-### 주가 예측
-
-주가 예측 서비스는 이전 주가 데이터를 통해 다음 주가를 예측하여 제공하는 서비스입니다.<br>
-주가 예측 서비스에는 딥러닝 기술 RNN이 적용 됐습니다.<br>
-기존 신경망 알고리즘은 데이터 맥락을 학습시킬 수 없었기 때문에 순환 신경망 알고리즘을 사용하게 됐습니다.<br> 아래 예시에서 주가 추세를 상당히 정확하게 예측하고 있습니다.
-
-![Untitled](README_assets/Untitled%202.png)
-
-### 백테스팅 빅데이터
-
-약 2500개 주식에 대한 상장 이후 모든 일일 거래 데이터를 사용하고 있습니다. 또한 매일 스케쥴링을 통해 최신 데이터를 자동으로 수집하고 있습니다.
-
-![빅데이터사진.png](README_assets/%EB%B9%85%EB%8D%B0%EC%9D%B4%ED%84%B0%EC%82%AC%EC%A7%84.png)
-
-### 데이터 시각화
-
-백테스트 결과를 한 눈에 알아보기 편하도록 차트를 사용하여 데이터를 시각화 하였습니다.
-
-![종목라인차트.PNG](README_assets/%EC%A2%85%EB%AA%A9%EB%9D%BC%EC%9D%B8%EC%B0%A8%ED%8A%B8.png)
-
-![연도별수익률차트.PNG](README_assets/%EC%97%B0%EB%8F%84%EB%B3%84%EC%88%98%EC%9D%B5%EB%A5%A0%EC%B0%A8%ED%8A%B8.png)
-
-## 🔨**협업 툴**
+## 🔨**Collaboration Tools**
 
 - Gitlab
 - Jira
@@ -181,19 +193,27 @@
 - Figma
 - ERDCloud
 
-## 📜**기능 명세서**
+## 💫Service Architecture
+
+![Untitled](README_assets/Untitled%201.png)
+
+## 📜**Functional Specification**
 
 [JRStock 기능명세서.pdf](README_assets/JRStock_%EA%B8%B0%EB%8A%A5%EB%AA%85%EC%84%B8%EC%84%9C.pdf)
 
-## 🖼️**화면 설계서 (초안)**
+## 🖼️**Figma Wireframe**
 
 ![화면설계서_초안2.png](README_assets/%ED%99%94%EB%A9%B4%EC%84%A4%EA%B3%84%EC%84%9C_%EC%B4%88%EC%95%882.png)
 
-## 👨‍💻**팀원 소개 / 역할**
+## 🔗**ERD**
+
+![ERD.png](README_assets/JRStock_ERD.png)
+
+## 👨‍💻**Our Team**
 
 ![Untitled](README_assets/Untitled%203.png)
 
-## 🐞**힘들었던 점 ( 문제 / 버그 )**
+## 🐞**Challenges ( Problems / Bugs )**
 
 ### BE
 
