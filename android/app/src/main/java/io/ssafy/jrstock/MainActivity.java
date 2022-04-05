@@ -142,12 +142,13 @@ public class MainActivity extends AppCompatActivity {
 //                return true;
 //            }
 //        });
-        mWebView.getSettings().setUserAgentString("Mozilla/5.0 AppleWebKit/535.19 Chrome/56.0.0 Mobile Safari/535.19");
-        mWebView.loadUrl(BASE_URL);
-
         // 웹뷰에서 보내는 JS 함수를 실행하기 위한 부분
         WebBridge webBridge = new WebBridge();
         mWebView.addJavascriptInterface(webBridge, "BRIDGE");
+        mWebView.getSettings().setUserAgentString("Mozilla/5.0 AppleWebKit/535.19 Chrome/56.0.0 Mobile Safari/535.19");
+        mWebView.loadUrl(BASE_URL);
+
+
 
         // 알림으로 접근시 지정된 페이지로 이동동
        String url = getIntent().getStringExtra("URL");
