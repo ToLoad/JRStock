@@ -35,8 +35,6 @@
 
 ## 💻 **Project Period - [2021.02.21 ~ 2021.04.08]**
 
-sddsad
-
 ## 👀 **jrstock service demo**
 
 ### 백테스트 생성
