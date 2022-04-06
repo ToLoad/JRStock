@@ -204,16 +204,6 @@ def add_day_stocks():
 @shared_task
 def add_predict_kospi():
     today = datetime.now()
-    start_mm_message = today.strftime('%Y-%m-%d') + ' 날짜의 Kospi 종가를 예측합니다.'
-    mm_message = {
-        'text': start_mm_message
-    }
-    mm_message = json.dumps(mm_message)
-    r = requests.post(
-        mm_url,
-        data=mm_message
-    )
-    
     df = pd.DataFrame([['Min',1745.250000, 1794.189941, 1742.670044, 375400.000000, 1791.880005, 1736.455981]
                     ,['Max', 3.305460e+03, 3.316080e+03, 3.295440e+03, 3.455500e+06, 3.305210e+03, 3.294838e+03]
                     ],columns=['index' ,'Open', 'High', 'Low', 'Volume', 'Close', 'ma_5' ])
@@ -268,16 +258,6 @@ def add_predict_kospi():
 @shared_task
 def add_predict_kosdaq():
     today = datetime.now()
-    start_mm_message = today.strftime('%Y-%m-%d') + ' 날짜의 Kosdaq 종가를 예측합니다.'
-    mm_message = {
-        'text': start_mm_message
-    }
-    mm_message = json.dumps(mm_message)
-    r = requests.post(
-        mm_url,
-        data=mm_message
-    )
-    
     df = pd.DataFrame([['Min',579.250000, 597.210022, 577.830017, 0.0, 596.710022, 571.766016]
                     ,['Max', 1.061320e+03, 1.062030e+03, 1.055640e+03, 1.522800e+06, 1.060000e+03, 1.056666e+03]
                     ],columns=['index' ,'Open', 'High', 'Low', 'Volume', 'Close', 'ma_5' ])
@@ -317,6 +297,492 @@ def add_predict_kosdaq():
     
     message = today + ' Kosdaq data predict completed'
     end_mm_message = today + ' Kosdaq 종가 예측이 종료되어 DB에 저장합니다. 예측 종가 : ' + str(round(result_close, 3)) + '원'
+    
+    mm_message = {
+        'text': end_mm_message
+    }
+    mm_message = json.dumps(mm_message)
+    r = requests.post(
+        mm_url,
+        data=mm_message
+    )
+    
+    return message
+
+@shared_task
+def add_predict_kia():
+    df = pd.DataFrame([['Min',25750.0, 27000.0, 25550.0, 0.0, 26800.0, 25910.0]
+                    ,['Max', 100500.0, 102000.0, 96300.0, 31478502.0, 101500.0, 95280.0]
+                    ],columns=['index' ,'Open', 'High', 'Low', 'Volume', 'Close', 'ma_5' ])
+    df = df.set_index('index')
+    
+    model = tf.keras.models.load_model('stock/predict_models/kia.h5')
+    
+    today = datetime.now()
+    end = (today - timedelta(days=1)).date()
+    start = (today- timedelta(days=30)).date()
+    
+    test_case = data.get_data_yahoo("000270.KS", start=start, end=end)
+    test_case = test_case[['Open', "High", "Low",  "Volume", "Close"]]
+    test_case['ma_5'] = test_case["Close"].rolling(window=5).mean()
+    test_x = test_case[-10:]
+    
+    numerator = test_x - df.loc['Min']
+    denominator = df.loc['Max'] - df.loc['Min']
+    test_x = numerator / (denominator + 1e-7)   
+    
+    result = model.predict([test_x.values.tolist()])
+    
+    denominator = df.loc['Max']['ma_5'] - df.loc['Min']['ma_5']
+    result_ma5 = result.mean() * (denominator + 1e-7) + df.loc['Min']['ma_5']
+
+    result_close = result_ma5*5 - sum(test_case.iloc[-4:].Close)
+    today = today.strftime('%Y-%m-%d')
+    financial_info = get_object_or_404(FinancialInfo, pk='000270')
+    
+    predict = {
+        'financial_info' : financial_info,
+        'date' : today,
+        'result_close' : round(result_close, 3),
+    }
+    serializer = PredictSerializer(data=predict)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        
+    message = today + ' KIA data predict completed'
+    end_mm_message = today + ' 기아 종가 예측이 종료되어 DB에 저장합니다. 예측 종가 : ' + str(round(result_close, 3)) + '원'
+    
+    mm_message = {
+        'text': end_mm_message
+    }
+    mm_message = json.dumps(mm_message)
+    r = requests.post(
+        mm_url,
+        data=mm_message
+    )
+        
+    return message
+
+@shared_task
+def add_predict_samsung_bio():
+    df = pd.DataFrame([['Min',474500.0,483000.0, 473000.0, 0.0, 477000.0, 468700.0]
+                    ,['Max', 1017000.0,1047000.0,991000.0, 3037570.0,1012000.0, 995000.0]
+                    ],columns=['index' ,'Open', 'High', 'Low', 'Volume', 'Close', 'ma_5' ])
+    df = df.set_index('index')
+    
+    model = tf.keras.models.load_model('stock/predict_models/samsung_bio.h5')
+    
+    today = datetime.now()
+    end = (today - timedelta(days=1)).date()
+    start = (today- timedelta(days=30)).date()
+    
+    test_case = data.get_data_yahoo("207940.KS", start=start, end=end)
+    test_case = test_case[['Open', "High", "Low",  "Volume", "Close"]]
+    test_case['ma_5'] = test_case["Close"].rolling(window=5).mean()
+    test_x = test_case[-10:]
+    
+    numerator = test_x - df.loc['Min']
+    denominator = df.loc['Max'] - df.loc['Min']
+    test_x = numerator / (denominator + 1e-7)   
+    
+    result = model.predict([test_x.values.tolist()])
+    
+    denominator = df.loc['Max']['ma_5'] - df.loc['Min']['ma_5']
+    result_ma5 = result.mean() * (denominator + 1e-7) + df.loc['Min']['ma_5']
+
+    result_close = result_ma5*5 - sum(test_case.iloc[-4:].Close)
+    today = today.strftime('%Y-%m-%d')
+    financial_info = get_object_or_404(FinancialInfo, pk='207940')
+    
+    predict = {
+        'financial_info' : financial_info,
+        'date' : today,
+        'result_close' : round(result_close, 3),
+    }
+    serializer = PredictSerializer(data=predict)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        
+    message = today + ' SAMSUNG_BIO data predict completed'
+    end_mm_message = today + ' 삼성바이오로직스 종가 예측이 종료되어 DB에 저장합니다. 예측 종가 : ' + str(round(result_close, 3)) + '원'
+    
+    mm_message = {
+        'text': end_mm_message
+    }
+    mm_message = json.dumps(mm_message)
+    r = requests.post(
+        mm_url,
+        data=mm_message
+    )
+    
+    return message
+
+@shared_task
+def add_predict_samsung():
+    df = pd.DataFrame([['Min',47250.0,48100.0, 47200.0, 0.0, 47850.0, 47210.0]
+                    ,['Max', 90300.0, 96800.0, 89500.0, 90306177.0, 91000.0, 89960.0]
+                    ],columns=['index' ,'Open', 'High', 'Low', 'Volume', 'Close', 'ma_5' ])
+    df = df.set_index('index')
+    
+    model = tf.keras.models.load_model('stock/predict_models/samsung.h5')
+    
+    today = datetime.now()
+    end = (today - timedelta(days=1)).date()
+    start = (today- timedelta(days=30)).date()
+    
+    test_case = data.get_data_yahoo("005930.KS", start=start, end=end)
+    test_case = test_case[['Open', "High", "Low",  "Volume", "Close"]]
+    test_case['ma_5'] = test_case["Close"].rolling(window=5).mean()
+    test_x = test_case[-10:]
+    
+    numerator = test_x - df.loc['Min']
+    denominator = df.loc['Max'] - df.loc['Min']
+    test_x = numerator / (denominator + 1e-7)   
+    
+    result = model.predict([test_x.values.tolist()])
+    
+    denominator = df.loc['Max']['ma_5'] - df.loc['Min']['ma_5']
+    result_ma5 = result.mean() * (denominator + 1e-7) + df.loc['Min']['ma_5']
+
+    result_close = result_ma5*5 - sum(test_case.iloc[-4:].Close)
+    today = today.strftime('%Y-%m-%d')
+    financial_info = get_object_or_404(FinancialInfo, pk='005930')
+    
+    predict = {
+        'financial_info' : financial_info,
+        'date' : today,
+        'result_close' : round(result_close, 3),
+    }
+    serializer = PredictSerializer(data=predict)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        
+    message = today + ' SAMSUNG data predict completed'
+    end_mm_message = today + ' 삼성전자 종가 예측이 종료되어 DB에 저장합니다. 예측 종가 : ' + str(round(result_close, 3)) + '원'
+    
+    mm_message = {
+        'text': end_mm_message
+    }
+    mm_message = json.dumps(mm_message)
+    r = requests.post(
+        mm_url,
+        data=mm_message
+    )
+    
+    return message
+
+@shared_task
+def add_predict_samsung_sdi():
+    df = pd.DataFrame([['Min',234500.0, 240000.0, 230500.0, 0.0, 240000.0, 235200.0]
+                ,['Max', 826000.0, 828000.0, 807000.0, 2107737.0, 817000.0, 806000.0]
+                ],columns=['index' ,'Open', 'High', 'Low', 'Volume', 'Close', 'ma_5' ])
+    df = df.set_index('index')
+    
+    model = tf.keras.models.load_model('stock/predict_models/samsung_sdi.h5')
+    
+    today = datetime.now()
+    end = (today - timedelta(days=1)).date()
+    start = (today- timedelta(days=30)).date()
+    
+    test_case = data.get_data_yahoo("006400.KS", start=start, end=end)
+    test_case = test_case[['Open', "High", "Low",  "Volume", "Close"]]
+    test_case['ma_5'] = test_case["Close"].rolling(window=5).mean()
+    test_x = test_case[-10:]
+    
+    numerator = test_x - df.loc['Min']
+    denominator = df.loc['Max'] - df.loc['Min']
+    test_x = numerator / (denominator + 1e-7)   
+    
+    result = model.predict([test_x.values.tolist()])
+    
+    denominator = df.loc['Max']['ma_5'] - df.loc['Min']['ma_5']
+    result_ma5 = result.mean() * (denominator + 1e-7) + df.loc['Min']['ma_5']
+
+    result_close = result_ma5*5 - sum(test_case.iloc[-4:].Close)
+    today = today.strftime('%Y-%m-%d')
+    financial_info = get_object_or_404(FinancialInfo, pk='006400')
+    
+    predict = {
+        'financial_info' : financial_info,
+        'date' : today,
+        'result_close' : round(result_close, 3),
+    }
+    serializer = PredictSerializer(data=predict)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        
+    message = today + ' SAMSUNG_SDI data predict completed'
+    end_mm_message = today + ' 삼성SDI 종가 예측이 종료되어 DB에 저장합니다. 예측 종가 : ' + str(round(result_close, 3)) + '원'
+    
+    mm_message = {
+        'text': end_mm_message
+    }
+    mm_message = json.dumps(mm_message)
+    r = requests.post(
+        mm_url,
+        data=mm_message
+    )
+    
+    return message
+
+@shared_task
+def add_predict_kakao():
+    df = pd.DataFrame([['Min',31700.0,32100.0, 31400.0, 0.0, 31500.0, 31240.0]
+                    ,['Max',172000.0,173000.0,161000.0, 18895148.0, 169500.0, 161700.0]
+                    ],columns=['index' ,'Open', 'High', 'Low', 'Volume', 'Close', 'ma_5' ])
+    df = df.set_index('index')
+    
+    model = tf.keras.models.load_model('stock/predict_models/kakao.h5')
+    
+    today = datetime.now()
+    end = (today - timedelta(days=1)).date()
+    start = (today- timedelta(days=30)).date()
+    
+    test_case = data.get_data_yahoo("035720.KS", start=start, end=end)
+    test_case = test_case[['Open', "High", "Low",  "Volume", "Close"]]
+    test_case['ma_5'] = test_case["Close"].rolling(window=5).mean()
+    test_x = test_case[-10:]
+    
+    numerator = test_x - df.loc['Min']
+    denominator = df.loc['Max'] - df.loc['Min']
+    test_x = numerator / (denominator + 1e-7)   
+    
+    result = model.predict([test_x.values.tolist()])
+    
+    denominator = df.loc['Max']['ma_5'] - df.loc['Min']['ma_5']
+    result_ma5 = result.mean() * (denominator + 1e-7) + df.loc['Min']['ma_5']
+
+    result_close = result_ma5*5 - sum(test_case.iloc[-4:].Close)
+    today = today.strftime('%Y-%m-%d')
+    financial_info = get_object_or_404(FinancialInfo, pk='035720')
+    
+    predict = {
+        'financial_info' : financial_info,
+        'date' : today,
+        'result_close' : round(result_close, 3),
+    }
+    serializer = PredictSerializer(data=predict)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        
+    message = today + ' Kakao data predict completed'
+    end_mm_message = today + ' 카카오 종가 예측이 종료되어 DB에 저장합니다. 예측 종가 : ' + str(round(result_close, 3)) + '원'
+    
+    mm_message = {
+        'text': end_mm_message
+    }
+    mm_message = json.dumps(mm_message)
+    r = requests.post(
+        mm_url,
+        data=mm_message
+    )
+    
+    return message
+
+@shared_task
+def add_predict_hyundai():
+    df = pd.DataFrame([['Min',86500.0, 88800.0, 85900.0, 0.0, 88800.0, 87160.0]
+                    ,['Max', 271000.0, 289000.0, 259500.0, 19933702.0, 267500.0, 260400.0]
+                    ],columns=['index' ,'Open', 'High', 'Low', 'Volume', 'Close', 'ma_5' ])
+    df = df.set_index('index')
+    
+    model = tf.keras.models.load_model('stock/predict_models/hyundai.h5')
+    
+    today = datetime.now()
+    end = (today - timedelta(days=1)).date()
+    start = (today- timedelta(days=30)).date()
+    
+    test_case = data.get_data_yahoo("005380.KS", start=start, end=end)
+    test_case = test_case[['Open', "High", "Low",  "Volume", "Close"]]
+    test_case['ma_5'] = test_case["Close"].rolling(window=5).mean()
+    test_x = test_case[-10:]
+    
+    numerator = test_x - df.loc['Min']
+    denominator = df.loc['Max'] - df.loc['Min']
+    test_x = numerator / (denominator + 1e-7)   
+    
+    result = model.predict([test_x.values.tolist()])
+    
+    denominator = df.loc['Max']['ma_5'] - df.loc['Min']['ma_5']
+    result_ma5 = result.mean() * (denominator + 1e-7) + df.loc['Min']['ma_5']
+
+    result_close = result_ma5*5 - sum(test_case.iloc[-4:].Close)
+    today = today.strftime('%Y-%m-%d')
+    financial_info = get_object_or_404(FinancialInfo, pk='005380')
+    
+    predict = {
+        'financial_info' : financial_info,
+        'date' : today,
+        'result_close' : round(result_close, 3),
+    }
+    serializer = PredictSerializer(data=predict)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        
+    message = today + ' Hyundai data predict completed'
+    end_mm_message = today + ' 현대자동차 종가 예측이 종료되어 DB에 저장합니다. 예측 종가 : ' + str(round(result_close, 3)) + '원'
+    
+    mm_message = {
+        'text': end_mm_message
+    }
+    mm_message = json.dumps(mm_message)
+    r = requests.post(
+        mm_url,
+        data=mm_message
+    )
+    
+    return message
+
+@shared_task
+def add_predict_lg():
+    df = pd.DataFrame([['Min',295000.0, 297000.0, 290500.0, 0.0, 296500.0, 295000.0]
+                    ,['Max', 1017000.0, 1050000.0, 1005000.0, 3408145.0, 1028000.0, 998000.0]
+                    ],columns=['index' ,'Open', 'High', 'Low', 'Volume', 'Close', 'ma_5' ])
+    df = df.set_index('index')
+    
+    model = tf.keras.models.load_model('stock/predict_models/lg.h5')
+    
+    today = datetime.now()
+    end = (today - timedelta(days=1)).date()
+    start = (today- timedelta(days=30)).date()
+    
+    test_case = data.get_data_yahoo("051910.KS", start=start, end=end)
+    test_case = test_case[['Open', "High", "Low",  "Volume", "Close"]]
+    test_case['ma_5'] = test_case["Close"].rolling(window=5).mean()
+    test_x = test_case[-10:]
+    
+    numerator = test_x - df.loc['Min']
+    denominator = df.loc['Max'] - df.loc['Min']
+    test_x = numerator / (denominator + 1e-7)   
+    
+    result = model.predict([test_x.values.tolist()])
+    
+    denominator = df.loc['Max']['ma_5'] - df.loc['Min']['ma_5']
+    result_ma5 = result.mean() * (denominator + 1e-7) + df.loc['Min']['ma_5']
+
+    result_close = result_ma5*5 - sum(test_case.iloc[-4:].Close)
+    today = today.strftime('%Y-%m-%d')
+    financial_info = get_object_or_404(FinancialInfo, pk='051910')
+    
+    predict = {
+        'financial_info' : financial_info,
+        'date' : today,
+        'result_close' : round(result_close, 3),
+    }
+    serializer = PredictSerializer(data=predict)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        
+    message = today + ' LG data predict completed'
+    end_mm_message = today + ' LG화학 종가 예측이 종료되어 DB에 저장합니다. 예측 종가 : ' + str(round(result_close, 3)) + '원'
+    
+    mm_message = {
+        'text': end_mm_message
+    }
+    mm_message = json.dumps(mm_message)
+    r = requests.post(
+        mm_url,
+        data=mm_message
+    )
+    
+    return message
+
+@shared_task
+def add_predict_naver():
+    df = pd.DataFrame([['Min',164500.0,167000.0, 162500.0, 0.0, 166000.0, 167000.0]
+                    ,['Max', 460000.0,465000.0,452000.0, 3303950.0, 454000.0, 447700.0]
+                    ],columns=['index' ,'Open', 'High', 'Low', 'Volume', 'Close', 'ma_5' ])
+    df = df.set_index('index')
+    
+    model = tf.keras.models.load_model('stock/predict_models/naver.h5')
+    
+    today = datetime.now()
+    end = (today - timedelta(days=1)).date()
+    start = (today- timedelta(days=30)).date()
+    
+    test_case = data.get_data_yahoo("035420.KS", start=start, end=end)
+    test_case = test_case[['Open', "High", "Low",  "Volume", "Close"]]
+    test_case['ma_5'] = test_case["Close"].rolling(window=5).mean()
+    test_x = test_case[-10:]
+    
+    numerator = test_x - df.loc['Min']
+    denominator = df.loc['Max'] - df.loc['Min']
+    test_x = numerator / (denominator + 1e-7)   
+    
+    result = model.predict([test_x.values.tolist()])
+    
+    denominator = df.loc['Max']['ma_5'] - df.loc['Min']['ma_5']
+    result_ma5 = result.mean() * (denominator + 1e-7) + df.loc['Min']['ma_5']
+
+    result_close = result_ma5*5 - sum(test_case.iloc[-4:].Close)
+    today = today.strftime('%Y-%m-%d')
+    financial_info = get_object_or_404(FinancialInfo, pk='035420')
+    
+    predict = {
+        'financial_info' : financial_info,
+        'date' : today,
+        'result_close' : round(result_close, 3),
+    }
+    serializer = PredictSerializer(data=predict)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        
+    message = today + ' NAVER data predict completed'
+    end_mm_message = today + ' 네이버 종가 예측이 종료되어 DB에 저장합니다. 예측 종가 : ' + str(round(result_close, 3)) + '원'
+    
+    mm_message = {
+        'text': end_mm_message
+    }
+    mm_message = json.dumps(mm_message)
+    r = requests.post(
+        mm_url,
+        data=mm_message
+    )
+    
+    return message
+
+@shared_task
+def add_predict_sk():
+    df = pd.DataFrame([['Min',72800.0,74400.0, 71300.0, 0.0, 71800.0, 74760.0]
+                    ,['Max', 149000.0,150500.0,142500.0, 19150647.0, 148500.0, 144700.0]
+                    ],columns=['index' ,'Open', 'High', 'Low', 'Volume', 'Close', 'ma_5' ])
+    df = df.set_index('index')
+    
+    model = tf.keras.models.load_model('stock/predict_models/sk.h5')
+    
+    today = datetime.now()
+    end = (today - timedelta(days=1)).date()
+    start = (today- timedelta(days=30)).date()
+    
+    test_case = data.get_data_yahoo("000660.KS", start=start, end=end)
+    test_case = test_case[['Open', "High", "Low",  "Volume", "Close"]]
+    test_case['ma_5'] = test_case["Close"].rolling(window=5).mean()
+    test_x = test_case[-10:]
+    
+    numerator = test_x - df.loc['Min']
+    denominator = df.loc['Max'] - df.loc['Min']
+    test_x = numerator / (denominator + 1e-7)   
+    
+    result = model.predict([test_x.values.tolist()])
+    
+    denominator = df.loc['Max']['ma_5'] - df.loc['Min']['ma_5']
+    result_ma5 = result.mean() * (denominator + 1e-7) + df.loc['Min']['ma_5']
+
+    result_close = result_ma5*5 - sum(test_case.iloc[-4:].Close)
+    today = today.strftime('%Y-%m-%d')
+    financial_info = get_object_or_404(FinancialInfo, pk='000660')
+    
+    predict = {
+        'financial_info' : financial_info,
+        'date' : today,
+        'result_close' : round(result_close, 3),
+    }
+    serializer = PredictSerializer(data=predict)
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        
+    message = today + ' SK data predict completed'
+    end_mm_message = today + ' SK하이닉스 종가 예측이 종료되어 DB에 저장합니다. 예측 종가 : ' + str(round(result_close, 3)) + '원'
     
     mm_message = {
         'text': end_mm_message
