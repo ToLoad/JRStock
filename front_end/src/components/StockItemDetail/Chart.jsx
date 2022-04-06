@@ -97,7 +97,7 @@ export default function Chart({ title, stock }) {
 
   return (
     <div>
-      {statusCode === 200 ? (
+      {statusCode === 200 && predictData.result_close ? (
         <div className="flex justify-start font-bold">
           <div className="text-primary">JRStock</div>
           <div className="text-secondary ml-2">종가예측</div>
@@ -118,7 +118,9 @@ export default function Chart({ title, stock }) {
               : stock.current_price > predictData.result_close
               ? "▼ "
               : "⁃"}
-            {(predictData.result_close - stock.current_price).toFixed()}{" "}
+            {(+(
+              predictData.result_close - stock.current_price
+            ).toFixed()).toLocaleString()}{" "}
             {"(" +
               (
                 ((predictData.result_close - stock.current_price) /
@@ -131,13 +133,13 @@ export default function Chart({ title, stock }) {
             {predictData.date} 기준
           </div>
         </div>
+      ) : statusCode === 200 && !predictData.result_close ? (
+        <div className="text-gray-400">
+          공휴일에는 종가예측이 제공되지 않습니다.
+        </div>
       ) : statusCode === 500 ? (
         <div className="text-gray-400">
           종가예측이 제공되지 않는 종목입니다..
-        </div>
-      ) : statusCode === 404 ? (
-        <div className="text-gray-400">
-          공휴일에는 종가예측이 제공되지 않습니다.
         </div>
       ) : (
         <div className="flex ml-5">

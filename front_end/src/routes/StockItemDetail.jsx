@@ -48,7 +48,6 @@ export default function StockItemDetail() {
       setLive(resLive.data);
       setIsLive(true);
     } catch (e) {
-      console.log(e);
       setIsError(true);
       toast.error("실시간 데이터가 없습니다!");
     }
