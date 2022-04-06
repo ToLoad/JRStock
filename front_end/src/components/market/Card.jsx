@@ -87,7 +87,7 @@ export default function card({ info }) {
             )}
           </div>
           <div className="ml-5 text-primary text-base whitespace-pre-wrap">
-            <strong>JR Stock</strong>에서 제공하는 머신러닝 기반 주가 예측
+            <strong>JRStock</strong>에서 제공하는 딥러닝 기반 주가 예측
           </div>
           <span className="ml-5 text-gray-400">{`${info.predict.date} 기준`}</span>
         </div>

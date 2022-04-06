@@ -45,7 +45,7 @@ export default function Signup() {
             <div className="flex justify-center relative">
               <Link to="/">
                 <h2 className="text-3xl font-extrabold text-primary text-center">
-                  JRstock
+                  JRStock
                 </h2>
                 <div className="absolute right-[90px] top-1">
                   <Rocket fill="#ff825c" />

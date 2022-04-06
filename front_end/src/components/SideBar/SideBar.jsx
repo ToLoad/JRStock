@@ -61,7 +61,7 @@ export default function SideBar() {
       <ul className="w-full mt-10 flex flex-col">
         <li className="logo">
           <Link to="/" className="flex items-center">
-            <span className="link-text">JRstock</span>
+            <span className="link-text">JRStock</span>
             <Rocket />
           </Link>
         </li>
