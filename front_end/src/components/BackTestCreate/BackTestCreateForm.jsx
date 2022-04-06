@@ -70,7 +70,7 @@ export default function BackTestCreateForm() {
         confirmButton:
           "w-32 bg-primary text-white px-3 py-2 m-2 hover:bg-active rounded-md duration-300",
         cancelButton:
-          "w-32 bg-active text-white px-3 py-2 m-2 hover:bg-primary rounded-md duration-300",
+          "w-32 bg-glass_primary text-white px-3 py-2 m-2 hover:bg-active rounded-md duration-300",
       },
       buttonsStyling: false,
     });
@@ -85,17 +85,44 @@ export default function BackTestCreateForm() {
         cancelButtonText: "취소",
         reverseButtons: true,
       })
-      .then((result) => {
+      .then(async (result) => {
         if (result.isConfirmed) {
-          swalWithBootstrapButtons.fire(
-            "성공",
-            `백테스트가 성공적으로 시작되었습니다.<br />설정 기간에 따라 최대 30초 이상 소요됩니다.`,
-            "success"
-          );
-        } else if (
-          /* Read more about handling dismissals below */
-          result.dismiss === Swal.DismissReason.cancel
-        ) {
+          if (!isStockSelected) {
+            swalWithBootstrapButtons.fire(
+              "실패",
+              "종목을 선택해주세요!",
+              "warning"
+            );
+            return;
+          }
+          const data = { ...values, asset: values.asset.replace(/,/gi, "") };
+          const res = await startBacktest(data).catch((err) => {
+            if (err.response) {
+              return err.response;
+            }
+          });
+
+          if (res.status === 201) {
+            swalWithBootstrapButtons.fire(
+              "성공",
+              "백테스트가 성공적으로 시작되었습니다.<br />설정 기간에 따라 최대 30초 이상 소요됩니다.",
+              "success"
+            );
+            navigate(`/backtest/`);
+          } else if (res.statue === 403) {
+            swalWithBootstrapButtons.fire(
+              "실패",
+              "아직 완료되지 않은 회원님의 백테스트가 존재합니다.<br />백테스트 완료 후 다시 시도해주세요.",
+              "warning"
+            );
+          } else {
+            swalWithBootstrapButtons.fire(
+              "실패",
+              "백테스트 신청에 실패하였습니다.",
+              "error"
+            );
+          }
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
           swalWithBootstrapButtons.fire(
             "취소됨",
             "백테스트 신청을 취소하였습니다.",
@@ -103,37 +130,6 @@ export default function BackTestCreateForm() {
           );
         }
       });
-
-    // const isConfirm = window.confirm("백테스트를 신청하시겠습니까?");
-    // if (!isConfirm) {
-    //   toast.error("백테스트 신청 취소");
-    //   return;
-    // }
-
-    // if (!isStockSelected) {
-    //   toast.warning("종목을 선택해주세요!");
-    //   return;
-    // }
-
-    // const data = { ...values, asset: values.asset.replace(/,/gi, "") };
-    // const res = await startBacktest(data).catch((err) => {
-    //   if (err.response) {
-    //     return err.response;
-    //   }
-    // });
-
-    // if (res.status === 201) {
-    //   toast.success(
-    //     "백테스트가 성공적으로 시작되었습니다. 설정 기간에 따라 최대 30초 이상 소요됩니다."
-    //   );
-    //   navigate(`/backtest/`);
-    // } else if (res.statue === 403) {
-    //   toast.error(
-    //     "아직 완료되지 않은 회원님의 백테스트가 존재합니다. 백테스트 완료 후 다시 시도해주세요."
-    //   );
-    // } else {
-    //   toast.error("백테스트 신청에 실패하였습니다.");
-    // }
   };
 
   const types = {
