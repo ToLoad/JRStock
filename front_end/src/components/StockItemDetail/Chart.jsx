@@ -3,6 +3,7 @@ import LineChart from "./LineChart";
 import { CandleChart } from "./CandleChart";
 import "../PageContainer.css";
 import { getDayStock, getWeekStock, getMonthStock } from "../../api/stock";
+import { getPredict } from "../../api/market";
 import { useParams } from "react-router-dom";
 import {
   transLineData,
@@ -23,7 +24,8 @@ export default function Chart({ title, stock }) {
   const [period, setPeriod] = useState("1D");
   const { id } = useParams();
   const [isLoading, setIsLoading] = useState(true);
-  const [statusCode, setStatusCode] = useState(200);
+  const [statusCode, setStatusCode] = useState(0);
+  const [predictData, setPredictData] = useState();
   const p = 428500;
 
   const init = async () => {
@@ -46,6 +48,14 @@ export default function Chart({ title, stock }) {
     candleData = transCandleData(resMonth.data);
     volumeData = transVolumeData(resMonth.data);
     setMonthData({ candleData, volumeData });
+
+    try {
+      const resPredict = await getPredict(stock.code_number);
+      setPredictData(resPredict);
+      setStatusCode(200);
+    } catch (e) {
+      setStatusCode(e.response.status);
+    }
   };
 
   useEffect(() => {
@@ -93,23 +103,33 @@ export default function Chart({ title, stock }) {
           <div className="text-secondary ml-2">종가예측</div>
           <div
             className={
-              "ml-5 " +
-              (stock.current_price < p
+              "ml-3 " +
+              (stock.current_price < predictData.result_close
                 ? "text-red-500"
-                : stock.current_price > p
+                : stock.current_price > predictData.result_close
                 ? "text-blue-600"
                 : "text-gray-600")
             }
           >
-            {(+p).toLocaleString()}&nbsp;&nbsp;
-            {stock.current_price < p
+            {(+predictData.result_close.toFixed()).toLocaleString()}
+            &nbsp;&nbsp;
+            {stock.current_price < predictData.result_close
               ? "▲ "
-              : stock.current_price > p
+              : stock.current_price > predictData.result_close
               ? "▼ "
               : "⁃"}
-            500 (0.5%)
+            {(predictData.result_close - stock.current_price).toFixed()}{" "}
+            {"(" +
+              (
+                ((predictData.result_close - stock.current_price) /
+                  stock.current_price) *
+                100
+              ).toFixed(2) +
+              "%)"}
           </div>
-          <div className="text-gray-400 font-normal ml-5">2022-04-04 기준</div>
+          <div className="text-gray-400 font-normal ml-5">
+            {predictData.date} 기준
+          </div>
         </div>
       ) : statusCode === 500 ? (
         <div className="text-gray-400">
@@ -117,7 +137,7 @@ export default function Chart({ title, stock }) {
         </div>
       ) : statusCode === 404 ? (
         <div className="text-gray-400">
-          주말에는 종가예측이 제공되지 않습니다.
+          공휴일에는 종가예측이 제공되지 않습니다.
         </div>
       ) : (
         <div className="flex ml-5">
