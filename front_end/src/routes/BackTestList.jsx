@@ -9,6 +9,7 @@ import SearchBar from "../components/BackTestList/SearchBar";
 import { ReactComponent as Create } from "../assets/create.svg";
 import { ReactComponent as Spinner } from "../assets/spinner_small.svg";
 import { toast } from "react-toastify";
+import Swal from "sweetalert2";
 
 export default function BackTestList() {
   const [isLoading, setIsLoading] = useState(true);
@@ -31,17 +32,49 @@ export default function BackTestList() {
 
   const handleDeleteButton = async (e, id) => {
     e.stopPropagation();
-    const answer = window.confirm("삭제하시겠습니까?");
-    if (!answer) {
-      toast.warning("취소하였습니다.");
-      return;
-    }
-    const res = await deleteBacktest(id);
-    console.log(res);
-    if (res.status === 200) {
-      toast.success("삭제되었습니다.");
-      setDeleteToggle((state) => !state);
-    }
+    const swalWithBootstrapButtons = Swal.mixin({
+      customClass: {
+        confirmButton:
+          "w-32 bg-primary text-white px-3 py-2 m-2 hover:bg-active rounded-md duration-300",
+        cancelButton:
+          "w-32 bg-glass_primary text-white px-3 py-2 m-2 hover:bg-active rounded-md duration-300",
+      },
+      buttonsStyling: false,
+    });
+
+    swalWithBootstrapButtons
+      .fire({
+        title: "삭제",
+        text: "백테스트를 삭제하시겠습니까?",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "삭제",
+        cancelButtonText: "취소",
+        reverseButtons: true,
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          const res = await deleteBacktest(id);
+          if (res.status === 200) {
+            setDeleteToggle((state) => !state);
+            swalWithBootstrapButtons.fire("성공", "삭제되었습니다.", "success");
+          }
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          swalWithBootstrapButtons.fire("취소됨", "취소하였습니다.", "error");
+        }
+      });
+
+    //   const answer = window.confirm("삭제하시겠습니까?");
+    //   if (!answer) {
+    //     toast.warning("취소하였습니다.");
+    //     return;
+    //   }
+    //   const res = await deleteBacktest(id);
+    //   console.log(res);
+    //   if (res.status === 200) {
+    //     toast.success("삭제되었습니다.");
+    //     setDeleteToggle((state) => !state);
+    //   }
   };
 
   const paintBackTestItems = backTestItems.map((item, index) => {
