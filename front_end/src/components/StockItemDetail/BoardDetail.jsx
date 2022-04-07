@@ -99,10 +99,25 @@ export default function BoardDetail() {
 
   // 댓글 삭제
   const clickDeleteComment = (id) => {
-    if (window.confirm("댓글을 삭제하시겠습니까?")) {
-      deleteComment(id);
-      init();
-    }
+    swalWithBootstrapButtons
+      .fire({
+        title: "삭제",
+        text: "댓글을 삭제하시겠습니까?",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "삭제",
+        cancelButtonText: "취소",
+        reverseButtons: true,
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          await deleteComment(id);
+          init();
+          swalWithBootstrapButtons.fire("성공", "삭제되었습니다.", "success");
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          swalWithBootstrapButtons.fire("취소됨", "취소하였습니다.", "error");
+        }
+      });
   };
 
   // 로그인 페이지로
