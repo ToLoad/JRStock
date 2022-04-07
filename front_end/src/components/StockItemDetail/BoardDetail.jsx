@@ -123,11 +123,23 @@ export default function BoardDetail() {
   // 로그인 페이지로
   const goLogin = () => {
     if (!isLogin) {
-      if (window.confirm("댓글을 작성하려면 로그인해야합니다.")) {
-        navigate("/login", {
-          state: { from: { pathname: `/stock/${id}/board/${boardId}` } },
+      swalWithBootstrapButtons
+        .fire({
+          title: "로그인",
+          text: "로그인 페이지로 이동하시겠습니까?",
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonText: "확인",
+          cancelButtonText: "취소",
+          reverseButtons: true,
+        })
+        .then(async (result) => {
+          if (result.isConfirmed) {
+            navigate("/login", {
+              state: { from: { pathname: `/stock/${id}/board/${boardId}` } },
+            });
+          }
         });
-      }
     }
   };
 

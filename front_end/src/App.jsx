@@ -47,9 +47,9 @@ function App() {
           <Route path="/stock" element={<StockItemList />} />
           <Route path="/stock/:id/:stockTab" element={<StockItemDetail />} />
           <Route path="/backtest/:id" element={<BackTestDetail />} />
+          <Route path="/stock/:id/board/:boardId" element={<BoardDetail />} />
           <Route element={<PrivateRoute />}>
             <Route path="/stock/:id/board/new" element={<BoardCreate />} />
-            <Route path="/stock/:id/board/:boardId" element={<BoardDetail />} />
             <Route
               path="/stock/:id/board/:boardId/update"
               element={<BoardUpdate />}
