@@ -12,6 +12,7 @@ import PageContainer from "../PageContainer";
 import Pagenation from "../Pagenation";
 import { timeMark } from "../../config/datetime";
 import { ReactComponent as Spinner } from "../../assets/spinner.svg";
+import Swal from "sweetalert2";
 
 export default function BoardDetail() {
   const { id, boardId } = useParams();
@@ -26,6 +27,16 @@ export default function BoardDetail() {
   const navigate = useNavigate();
   const pageSize = 10;
   const isLogin = !sessionStorage.getItem("access_token") ? false : true;
+
+  const swalWithBootstrapButtons = Swal.mixin({
+    customClass: {
+      confirmButton:
+        "w-32 bg-primary text-white px-3 py-2 m-2 hover:bg-active rounded-md duration-300",
+      cancelButton:
+        "w-32 bg-glass_primary text-white px-3 py-2 m-2 hover:bg-active rounded-md duration-300",
+    },
+    buttonsStyling: false,
+  });
 
   const init = async () => {
     const boardData = await getBoardDetail(boardId);
@@ -48,10 +59,25 @@ export default function BoardDetail() {
 
   // 게시글 삭제
   const clickDeleteBoard = async () => {
-    if (window.confirm("게시글을 삭제하시겠습니까?")) {
-      await deleteBoard(boardId);
-      navigate(`/stock/${id}/board`);
-    }
+    swalWithBootstrapButtons
+      .fire({
+        title: "삭제",
+        text: "게시글을 삭제하시겠습니까?",
+        icon: "info",
+        showCancelButton: true,
+        confirmButtonText: "삭제",
+        cancelButtonText: "취소",
+        reverseButtons: true,
+      })
+      .then(async (result) => {
+        if (result.isConfirmed) {
+          await deleteBoard(boardId);
+          swalWithBootstrapButtons.fire("성공", "삭제되었습니다.", "success");
+          navigate(`/stock/${id}/board`);
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+          swalWithBootstrapButtons.fire("취소됨", "취소하였습니다.", "error");
+        }
+      });
   };
 
   // 게시글 수정

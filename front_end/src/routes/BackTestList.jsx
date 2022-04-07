@@ -63,18 +63,6 @@ export default function BackTestList() {
           swalWithBootstrapButtons.fire("취소됨", "취소하였습니다.", "error");
         }
       });
-
-    //   const answer = window.confirm("삭제하시겠습니까?");
-    //   if (!answer) {
-    //     toast.warning("취소하였습니다.");
-    //     return;
-    //   }
-    //   const res = await deleteBacktest(id);
-    //   console.log(res);
-    //   if (res.status === 200) {
-    //     toast.success("삭제되었습니다.");
-    //     setDeleteToggle((state) => !state);
-    //   }
   };
 
   const paintBackTestItems = backTestItems.map((item, index) => {
