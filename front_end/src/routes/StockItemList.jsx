@@ -12,6 +12,7 @@ import costMap from "../util/costMap";
 import { ReactComponent as ModalCancle } from "../assets/modalCancle.svg";
 import OnOffToggle from "../components/OnOffToggle";
 import { ReactComponent as Spinner } from "../assets/spinner.svg";
+import { toast } from "react-toastify";
 
 export default function StockItemList() {
   const navigate = useNavigate();
@@ -242,20 +243,23 @@ export default function StockItemList() {
     if (checkedList.length) {
       const res = await addInterest(checkedList);
       if (res.data.duplicate) {
-        alert(
-          `이미 추가된 ${res.data.duplicate}개를 제외한 ${
-            checkedList.length - res.data.duplicate
-          }개의 항목이 관심종목에 추가되었습니다.`
+        toast.info(
+          <div>
+            이미 추가된 {res.data.duplicate}개를 제외한{" "}
+            {checkedList.length - res.data.duplicate}개의
+            <br />
+            항목이 관심종목에 추가되었습니다.
+          </div>
         );
       } else {
-        alert(
+        toast.success(
           `선택하신 ${checkedList.length}개의 항목이 관심종목에 추가되었습니다.`
         );
       }
       setcheckedList([]);
       setIsAllChecked(false);
     } else {
-      alert("하나 이상의 종목을 선택해주세요.");
+      toast.error("하나 이상의 종목을 선택해주세요.");
     }
   };
 
